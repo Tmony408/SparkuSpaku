@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { AppError } from '../../utils/errors';
-import { randomToken, sha256 } from '../../utils/crypto';
+import { generateOtp6, randomToken, sha256 } from '../../utils/crypto';
 import { UserModel } from '../users/user.model';
 import { signAccessToken, signRefreshToken } from '../../utils/jwt';
 
@@ -10,7 +10,7 @@ export async function signupWithEmail(email: string, password: string, displayNa
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const rawToken = randomToken(24);
+  const rawToken = generateOtp6();
   const tokenHash = sha256(rawToken);
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
