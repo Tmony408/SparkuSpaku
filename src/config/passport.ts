@@ -46,7 +46,7 @@ export function configurePassport() {
             });
           }
 
-          return done(null, user);
+          return done(null, user.toObject() as any);
         } catch (e) {
           return done(e as Error);
         }
