@@ -28,12 +28,13 @@ export async function signupWithEmail(email: string, password: string, displayNa
   return { userId: String(user._id), verificationToken: rawToken };
 }
 
-export async function verifyEmailToken(token: string) {
+export async function verifyEmailToken(token: string, email: string) {
   const tokenHash = sha256(token);
   const now = new Date();
 
   const user = await UserModel.findOne({
     emailVerificationTokenHash: tokenHash,
+    email,
     emailVerificationExpiresAt: { $gt: now }
   });
 

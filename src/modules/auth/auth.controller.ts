@@ -13,7 +13,7 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
 
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const body = verifyEmailSchema.parse(req.body);
-  const result = await verifyEmailToken(body.token);
+  const result = await verifyEmailToken(body.token, body.email);
   res.json(ok({ message: 'Email verified', ...result }));
 });
 
