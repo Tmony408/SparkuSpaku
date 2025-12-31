@@ -12,7 +12,7 @@ import { dashboardRoutes } from './modules/dashboard/dashboard.routes';
 import { questionRoutes } from './modules/questions/question.routes';
 import { progressRoutes } from './modules/progress/progress.routes';
 
-import { errorMiddleware } from './middlewares/error.middleware';
+import { errorMiddleware, notFound } from './middlewares/error.middleware';
 import { env } from './config/env';
 import { configurePassport } from './config/passport';
 
@@ -44,6 +44,10 @@ export function createApp() {
   app.use('/api/v1/dashboard', dashboardRoutes);
   app.use('/api/v1/questions', questionRoutes);
   app.use('/api/v1/progress', progressRoutes);
+
+
+// Not Found error Handler
+app.use(notFound); 
 
   app.use(errorMiddleware);
 
