@@ -58,7 +58,7 @@ export async function sendEmail(
     // Resolve template path
     const templatePath = path.join(
       __dirname,
-      `../email_templates/${templateName}.hbs`
+      `../hbs/${templateName}.hbs`
     );
 
     // Check if template file exists
