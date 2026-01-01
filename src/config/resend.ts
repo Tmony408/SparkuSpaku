@@ -1,13 +1,9 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import path from "path";
 import fs from "fs";
 import handlebars from "handlebars";
 import { env } from "./env";
 
-// Initialize Resend client
-const resend = new Resend(env.RESEND_API_KEY);
-
-// Email data interface
 interface EmailData {
   to: string;
   subject: string;
@@ -15,39 +11,49 @@ interface EmailData {
   html: string;
 }
 
-/**
- * Send email using Resend
- * @param data - Email data including recipient, subject, and HTML content
- */
+function createTransporter() {
+  const port = Number(env.SMTP_PORT || 587);
+  const secure = String(env.SMTP_SECURE || "false") === "true";
+
+  if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASS) {
+    throw new Error("Missing SMTP env vars: SMTP_HOST, SMTP_USER, SMTP_PASS");
+  }
+
+  return nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port,
+    secure,
+    auth: {
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASS
+    }
+  });
+}
+
 async function sendmail(data: EmailData): Promise<void> {
   try {
-    const result = await resend.emails.send({
-      from: `Eve <${env.EMAIL_FROM}>`,
+    const transporter = createTransporter();
+
+    const from = `Eve <${env.EMAIL_FROM}>`;
+    if (!env.EMAIL_FROM) throw new Error("EMAIL_FROM is missing");
+
+    const info = await transporter.sendMail({
+      from,
       to: data.to,
       subject: data.subject,
       html: data.html,
-      text: data.text || "Hello from Eve",
+      text: data.text || "Hello from Eve"
     });
 
-    if (result.error) {
-      console.error("Error sending email:", result.error);
-      throw new Error(`Failed to send email: ${JSON.stringify(result.error)}`);
-    }
-
-    console.log("Message sent successfully. Email ID:", result.data?.id);
+    console.log("Message sent:", info.messageId);
   } catch (error) {
     console.error("Error sending email:", error);
-    throw new Error(`Error sending email: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Error sending email: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
-/**
- * Send email using Handlebars template
- * @param context - Template context variables
- * @param email - Recipient email address
- * @param subject - Email subject
- * @param templateName - Name of the template file (without .hbs extension)
- */
 export async function sendEmail(
   context: any,
   email: string,
@@ -55,36 +61,26 @@ export async function sendEmail(
   templateName: string
 ): Promise<void> {
   try {
-    // Resolve template path
-    const templatePath = path.join(
-      __dirname,
-      `../hbs/${templateName}.hbs`
-    );
+    const templatePath = path.join(__dirname, `../hbs/${templateName}.hbs`);
 
-    // Check if template file exists
     if (!fs.existsSync(templatePath)) {
       throw new Error(`Email template not found: ${templatePath}`);
     }
 
-    // Read and compile template
     const source = fs.readFileSync(templatePath, "utf8");
     const template = handlebars.compile(source);
     const html = template(context);
 
-    // Prepare email data
     const emailData: EmailData = {
       to: email,
+      subject,
       text: "Hello from Eve",
-      subject: subject,
-      html,
+      html
     };
 
-    // Send email
     await sendmail(emailData);
   } catch (error) {
     console.error("Error in sendEmail:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Error sending email"
-    );
+    throw new Error(error instanceof Error ? error.message : "Error sending email");
   }
 }

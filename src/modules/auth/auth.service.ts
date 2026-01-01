@@ -26,16 +26,16 @@ export async function signupWithEmail(email: string, password: string, displayNa
     emailVerificationTokenHash: tokenHash,
     emailVerificationExpiresAt: expires
   });
-const templateContext = {
-  "appName": "Sparku Spaku",
-  "firstName": user.displayName || "User",
-  "otp": rawToken,
-  "expiresInMinutes": "24 hours",
-  "supportEmail": "support@sparkuspaku.com",
-  "year": 2026
-}
+// const templateContext = {
+//   "appName": "Sparku Spaku",
+//   "firstName": user.displayName || "User",
+//   "otp": rawToken,
+//   "expiresInMinutes": "24 hours",
+//   "supportEmail": "support@sparkuspaku.com",
+//   "year": 2026
+// }
 
-sendEmail(templateContext, user.email, "Verify your email", "email_verification");
+// sendEmail(templateContext, user.email, "Verify your email", "email_verification");
   // In production you would email rawToken. For development we return it.
   return { userId: String(user._id), verificationToken: rawToken };
 }
