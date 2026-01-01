@@ -37,6 +37,10 @@ export function createApp() {
   configurePassport();
   app.use(passport.initialize());
 
+  app.get("/", (_req, res) => {
+  res.status(200).json({ ok: true, name: "Couples Game API" });
+});
+
   app.get('/health', (_req, res) => res.json({ ok: true }));
 
   app.use('/api/v1/auth', authRoutes);
